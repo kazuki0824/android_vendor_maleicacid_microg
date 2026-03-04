@@ -12,7 +12,7 @@ genrule {
     name: "maleicacid_microg_gmscore_apk",
     tools: ["maleicacid_microg_build"],
     out: ["microg-gmscore.apk"],
-    cmd: "\$(location maleicacid_microg_build) gmscore \$(out)",
+    cmd: "$(location maleicacid_microg_build) gmscore $(out)",
 }
 
 // Build microG Companion (FakeStore replacement) using Gradle.
@@ -20,7 +20,7 @@ genrule {
     name: "maleicacid_microg_companion_apk",
     tools: ["maleicacid_microg_build"],
     out: ["microg-companion.apk"],
-    cmd: "\$(location maleicacid_microg_build) companion \$(out)",
+    cmd: "$(location maleicacid_microg_build) companion $(out)",
 }
 
 android_app_import {

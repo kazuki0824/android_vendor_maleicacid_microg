@@ -5,6 +5,8 @@ package {
 sh_binary {
     name: "maleicacid_microg_build",
     src: "build_microg.sh",
+    host_supported: true,
+    device_supported: false,
 }
 
 // Build microG Services (GmsCore) from repo-synced source using Gradle (allowed by requirement 10*).

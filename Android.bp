@@ -15,7 +15,7 @@ filegroup {
     name: "maleicacid_microg_upstream_srcs",
     // sbox に upstream を持ち込む（これが無いと sandbox 内から見えない）
     srcs: [
-        "upstream/GmsCore/**",
+        "upstream/GmsCore/**/**",
     ],
 }
 

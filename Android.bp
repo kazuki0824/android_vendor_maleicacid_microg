@@ -5,52 +5,60 @@ package {
 sh_binary {
     name: "maleicacid_microg_build",
     src: "build_microg.sh",
+
+    // genrule の tools はホストで実行されるため host variant が必須
     host_supported: true,
     device_supported: false,
 }
 
-// Build microG Services (GmsCore) from repo-synced source using Gradle (allowed by requirement 10*).
+filegroup {
+    name: "maleicacid_microg_upstream_srcs",
+    // sbox に upstream を持ち込む（これが無いと sandbox 内から見えない）
+    srcs: [
+        "upstream/GmsCore/**",
+    ],
+}
+
 genrule {
     name: "maleicacid_microg_gmscore_apk",
     tools: ["maleicacid_microg_build"],
+    srcs: [":maleicacid_microg_upstream_srcs"],
     out: ["microg-gmscore.apk"],
-    cmd: "$(location maleicacid_microg_build) gmscore $(out)",
+
+    // sbox 内では srcs が module-dir 相対で展開される想定（upstream/GmsCore が見える）
+    // 書き込みは $(genDir) 配下のみ（sbox の out 領域）
+    cmd: "$(location maleicacid_microg_build) gmscore " +
+         "--src upstream/GmsCore " +
+         "--workdir $(genDir)/work-gmscore " +
+         "--out $(out)",
 }
 
-// Build microG Companion (FakeStore replacement) using Gradle.
 genrule {
     name: "maleicacid_microg_companion_apk",
     tools: ["maleicacid_microg_build"],
+    srcs: [":maleicacid_microg_upstream_srcs"],
     out: ["microg-companion.apk"],
-    cmd: "$(location maleicacid_microg_build) companion $(out)",
+
+    cmd: "$(location maleicacid_microg_build) companion " +
+         "--src upstream/GmsCore " +
+         "--workdir $(genDir)/work-companion " +
+         "--out $(out)",
 }
 
 android_app_import {
-    name: "MicroGServices",
+    name: "maleicacid_microg_gmscore",
     apk: ":maleicacid_microg_gmscore_apk",
-    default_dev_cert: true,
+    certificate: "platform",
     privileged: true,
     product_specific: true,
-    dex_preopt: {
-        enabled: false,
-    },
+    dex_preopt: { enabled: false },
 }
 
 android_app_import {
-    name: "MicroGCompanion",
+    name: "maleicacid_microg_companion",
     apk: ":maleicacid_microg_companion_apk",
-    default_dev_cert: true,
+    certificate: "platform",
     privileged: true,
     product_specific: true,
-    dex_preopt: {
-        enabled: false,
-    },
-}
-
-prebuilt_etc {
-    name: "privapp-permissions-maleicacid-microg",
-    src: "permissions/privapp-permissions-maleicacid-microg.xml",
-    sub_dir: "permissions",
-    filename_from_src: true,
-    product_specific: true,
+    dex_preopt: { enabled: false },
 }
